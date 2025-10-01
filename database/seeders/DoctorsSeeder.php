@@ -3,38 +3,79 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Doctor;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Doctor;
+use Spatie\Permission\Models\Role;
 
-class DoctorsSeeder extends Seeder
+class DoctorSeeder extends Seeder
 {
     public function run(): void
     {
-        $doctors = [
-            ['name' => 'Dr. Ahmed', 'specialty' => 'Cardiologist', 'phone' => '01000000001', 'bio' => 'Senior cardiologist.'],
-            ['name' => 'Dr. Sara', 'specialty' => 'Dentist', 'phone' => '01000000002', 'bio' => 'General dentist.'],
+        // تأكد من وجود role باسم "doctor"
+        $doctorRole = Role::firstOrCreate(['name' => 'doctor']);
+
+        $commonPassword = Hash::make('123456');
+
+        $doctorsData = [
+            [
+                'name' => 'د. أحمد محمد',
+                'email' => 'ahmed@example.com',
+                'specialty' => 'طب القلب',
+                'phone' => '01012345678',
+                'bio' => 'أخصائي أمراض القلب وقسطرة الشرايين، خبرة أكثر من 10 سنوات.',
+            ],
+            [
+                'name' => 'د. سارة علي',
+                'email' => 'sara@example.com',
+                'specialty' => 'الجلدية',
+                'phone' => '01023456789',
+                'bio' => 'طبيبة جلدية متخصصة في علاج حب الشباب والأمراض الجلدية المزمنة.',
+            ],
+            [
+                'name' => 'د. خالد حسن',
+                'email' => 'khaled@example.com',
+                'specialty' => 'العظام',
+                'phone' => '01034567890',
+                'bio' => 'أخصائي جراحة العظام وعلاج الإصابات الرياضية.',
+            ],
+            [
+                'name' => 'د. منى عبد الرحمن',
+                'email' => 'mona@example.com',
+                'specialty' => 'النساء والتوليد',
+                'phone' => '01045678901',
+                'bio' => 'أخصائية نساء وتوليد، خبرة في الولادات الطبيعية والقيصرية.',
+            ],
+            [
+                'name' => 'د. عمر فؤاد',
+                'email' => 'omar@example.com',
+                'specialty' => 'الأنف والأذن والحنجرة',
+                'phone' => '01056789012',
+                'bio' => 'استشاري أمراض الأنف والأذن والحنجرة، متخصص في جراحات التجميل الوظيفي.',
+            ],
         ];
 
-        foreach ($doctors as $index => $d) {
-            // انشاء او تحديث يوزر بسيط لكل دكتور (Doctor 1, Doctor 2, ...)
-            $num = $index + 1;
-            $username = 'Doctor ' . $num;
-            $email = 'doctor' . $num . '@example.com';
+        foreach ($doctorsData as $data) {
+            // إنشاء المستخدم عبر Eloquent (ضروري لـ Spatie)
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'email_verified_at' => Carbon::now(),
+                'password' => $commonPassword,
+            ]);
 
-            $user = User::updateOrCreate(
-                ['email' => $email],
-                [
-                    'name' => $username,
-                    'password' => Hash::make('password')
-                ]
-            );
+            // تعيين الدور "doctor"
             $user->assignRole('doctor');
-            // ربط الدوكتور باليوزر الذي تم إنشاؤه/تحديثه
-            Doctor::updateOrCreate(
-                ['name' => $d['name']],
-                array_merge($d, ['user_id' => $user->id])
-            );
+
+            // إنشاء سجل الدكتور
+            Doctor::create([
+                'user_id' => $user->id,
+                'name' => $data['name'],
+                'specialty' => $data['specialty'],
+                'phone' => $data['phone'],
+                'bio' => $data['bio'],
+            ]);
         }
     }
 }

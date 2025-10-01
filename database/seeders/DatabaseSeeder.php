@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             UsersSeeder::class,
             DoctorsSeeder::class,
             PatientsSeeder::class,
+            WorkingHoursSeeder::class,
             ServicesSeeder::class,
             AppointmentsSeeder::class,
             InvoicesSeeder::class,

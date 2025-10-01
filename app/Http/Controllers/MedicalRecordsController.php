@@ -21,6 +21,11 @@ class MedicalRecordsController extends Controller
         ]);
 
         $record = MedicalRecord::create($data);
+
+        if ($request->expectsJson() || $request->isJson() || $request->header('Content-Type') === 'application/json') {
+            return response()->json(['id' => $record->id, 'success' => true]);
+        }
+
         return redirect()->route('admin.patients.show', $data['patient_id'])->with('success','تم إنشاء السجل');
     }
 

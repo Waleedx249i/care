@@ -1,81 +1,137 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-person-plus me-2"></i> إضافة مريض جديد</h3>
-        <a href="{{ route('admin.patients.index') }}" class="btn btn-sm btn-outline-secondary">العودة للقائمة</a>
-    </div>
+<div class="container py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form id="createPatientForm">
-                @csrf
+        <!-- العنوان وزر العودة -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                <span class="mr-2">👤</span>
+                إضافة مريض جديد
+            </h1>
+            <a href="{{ route('admin.patients.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                العودة للقائمة
+            </a>
+        </div>
 
-                <div class="row g-3">
-                    <!-- Patient Fields -->
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">كود المريض <span class="text-danger">*</span></label>
-                        <input type="text" name="code" class="form-control" required>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">الجنس</label>
-                        <select name="gender" class="form-select">
-                            <option value="">غير محدد</option>
-                            <option value="male">ذكر</option>
-                            <option value="female">أنثى</option>
-                            <option value="other">آخر</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">تاريخ الميلاد</label>
-                        <input type="date" name="birth_date" class="form-control">
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">رقم الهاتف</label>
-                        <input type="tel" name="phone" class="form-control" placeholder="+966...">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">العنوان</label>
-                        <textarea name="address" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">ملاحظات</label>
-                        <textarea name="notes" class="form-control" rows="2"></textarea>
-                    </div>
+        <!-- نموذج الإضافة -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6">
+                <form id="createPatientForm" class="space-y-6">
 
-                    <div class="col-12 border-top pt-3 mt-3">
-                        <h5 class="mb-3"><i class="bi bi-person-gear me-2"></i> إنشاء حساب مستخدم (اختياري)</h5>
-                        <div class="form-check mb-3">
-                            <input type="checkbox" id="createUser" class="form-check-input">
-                            <label class="form-check-label" for="createUser">إنشاء حساب مستخدم لهذا المريض</label>
+                    @csrf
+
+                    <!-- الحقول الأساسية -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- الكود -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                كود المريض <span class="text-red-600">*</span>
+                            </label>
+                            <input type="text" name="code" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         </div>
 
-                        <div id="userFields" class="row g-3 d-none">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">البريد الإلكتروني <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control">
+                        <!-- الاسم الكامل -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                الاسم الكامل <span class="text-red-600">*</span>
+                            </label>
+                            <input type="text" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        </div>
+
+                        <!-- الجنس -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الجنس</label>
+                            <select name="gender" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                <option value="">غير محدد</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                                <option value="other">آخر</option>
+                            </select>
+                        </div>
+
+                        <!-- تاريخ الميلاد -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الميلاد</label>
+                            <input type="date" name="birth_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        </div>
+
+                        <!-- رقم الهاتف -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                            <input type="tel" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="+966...">
+                        </div>
+
+                        <!-- العنوان -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
+                            <textarea name="address" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" rows="2"></textarea>
+                        </div>
+
+                        <!-- الملاحظات -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                            <textarea name="notes" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" rows="2"></textarea>
+                        </div>
+
+                    </div>
+
+                    <!-- قسم إنشاء حساب مستخدم -->
+                    <div class="border-t border-gray-200 pt-6 mt-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <span class="mr-2">👤⚙️</span>
+                            إنشاء حساب مستخدم (اختياري)
+                        </h2>
+
+                        <div class="mb-5">
+                            <div class="flex items-start">
+                                <input type="checkbox" id="createUser" class="mt-1 h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                                <label for="createUser" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                    إنشاء حساب مستخدم لهذا المريض
+                                </label>
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">كلمة المرور <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="password" name="password" class="form-control">
-                                    <button type="button" class="btn btn-outline-secondary" id="generatePassword">توليد</button>
+                        </div>
+
+                        <!-- حقول الحساب (مخفية افتراضيًا) -->
+                        <div id="userFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 d-none">
+
+                            <!-- البريد الإلكتروني -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    البريد الإلكتروني <span class="text-red-600">*</span>
+                                </label>
+                                <input type="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            </div>
+
+                            <!-- كلمة المرور -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    كلمة المرور <span class="text-red-600">*</span>
+                                </label>
+                                <div class="flex gap-2">
+                                    <input type="password" name="password" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    <button type="button" id="generatePassword" class="px-4 py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">
+                                        توليد
+                                    </button>
                                 </div>
                             </div>
+
                         </div>
                     </div>
-                </div>
 
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-primary px-4">حفظ المريض</button>
-                </div>
-            </form>
+                    <!-- زر الحفظ -->
+                    <div class="pt-6 text-right">
+                        <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium text-sm rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all">
+                            حفظ المريض
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
+
     </div>
 </div>
 
@@ -88,11 +144,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle User Fields
     toggle.addEventListener('change', function() {
-        userFields.classList.toggle('d-none', !this.checked);
         if (this.checked) {
+            userFields.classList.remove('d-none');
             document.querySelector('input[name="email"]').setAttribute('required', true);
             passwordInput.setAttribute('required', true);
         } else {
+            userFields.classList.add('d-none');
             document.querySelector('input[name="email"]').removeAttribute('required');
             passwordInput.removeAttribute('required');
         }

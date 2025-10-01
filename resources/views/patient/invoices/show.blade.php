@@ -1,54 +1,51 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Invoice #{{ $invoice->id }}</h2>
-        <div>
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-2">
+        <h2 class="text-2xl font-bold text-blue-700">Invoice #{{ $invoice->id }}</h2>
+        <div class="flex gap-2">
             @if($invoice->status != 'paid')
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" data-invoice-id="{{ $invoice->id }}" data-invoice-net="{{ $invoice->net_total }}" data-invoice-paid="{{ $invoice->payments->sum('amount') }}">Pay Now</button>
+                <button class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition" data-bs-toggle="modal" data-bs-target="#paymentModal" data-invoice-id="{{ $invoice->id }}" data-invoice-net="{{ $invoice->net_total }}" data-invoice-paid="{{ $invoice->payments->sum('amount') }}">Pay Now</button>
             @endif
-            <a href="{{ route('patient.invoices.index') }}" class="btn btn-link">Back</a>
+            <a href="{{ route('patient.invoices.index') }}" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Back</a>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12 col-md-8">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="mb-2">Patient</h5>
-                    <div>{{ $invoice->patient->name ?? ($invoice->patient->first_name.' '.$invoice->patient->last_name) }}</div>
-                    <div class="text-muted">Phone: {{ $invoice->patient->phone }}</div>
-                    <hr>
-                    <h5 class="mb-2">Doctor</h5>
-                    <div>{{ $invoice->doctor->user->name ?? $invoice->doctor->name }}</div>
-                    <div class="text-muted">{{ $invoice->doctor->specialty ?? '' }}</div>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <div class="bg-white rounded-lg shadow mb-6 p-6">
+                <h5 class="text-lg font-semibold text-gray-700 mb-2">Patient</h5>
+                <div class="mb-2 text-gray-700">{{ $invoice->patient->name ?? ($invoice->patient->first_name.' '.$invoice->patient->last_name) }}</div>
+                <div class="text-gray-500">Phone: {{ $invoice->patient->phone }}</div>
+                <hr class="my-4">
+                <h5 class="text-lg font-semibold text-gray-700 mb-2">Doctor</h5>
+                <div class="mb-2 text-gray-700">{{ $invoice->doctor->user->name ?? $invoice->doctor->name }}</div>
+                <div class="text-gray-500">{{ $invoice->doctor->specialty ?? '' }}</div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5>Items</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Service</th>
-                                    <th class="text-end">Qty</th>
-                                    <th class="text-end">Price</th>
-                                    <th class="text-end">Line Total</th>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h5 class="text-lg font-semibold text-gray-700 mb-2">Items</h5>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded shadow">
+                        <thead class="bg-blue-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Service</th>
+                                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Qty</th>
+                                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Price</th>
+                                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($invoice->items as $it)
+                                <tr class="border-b">
+                                    <td class="px-4 py-2">{{ $it->service->name ?? 'Service #' . $it->service_id }}</td>
+                                    <td class="px-4 py-2 text-right">{{ $it->qty }}</td>
+                                    <td class="px-4 py-2 text-right">{{ number_format($it->unit_price,2) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ number_format($it->line_total,2) }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($invoice->items as $it)
-                                    <tr>
-                                        <td>{{ $it->service->name ?? 'Service #' . $it->service_id }}</td>
-                                        <td class="text-end">{{ $it->qty }}</td>
-                                        <td class="text-end">{{ number_format($it->unit_price,2) }}</td>
-                                        <td class="text-end">{{ number_format($it->line_total,2) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
+                            @endforeach
+                        </tbody>
                         </table>
                     </div>
                 </div>

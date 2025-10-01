@@ -31,22 +31,11 @@ class AppointmentsController extends Controller
         if ($request->filled('from')) $q->whereDate('starts_at', '>=', $request->from);
         if ($request->filled('to')) $q->whereDate('starts_at', '<=', $request->to);
 
-        $items = $q->orderBy('starts_at')->get();
+        // فقط المواعيد الفارغة
+        $items = $q->where('status', 'free')->orderBy('starts_at')->get();
 
-        // for calendar: return events format
-        if ($request->get('format') === 'calendar') {
-            return $items->map(function($a){
-                return [
-                    'id' => $a->id,
-                    'title' => ($a->patient->name ?? 'Patient').' — '.($a->doctor->name ?? 'Doctor'),
-                    'start' => $a->starts_at->toIsoString(),
-                    'end' => $a->ends_at->toIsoString(),
-                    'status' => $a->status,
-                ];
-            });
-        }
-
-        return $items;
+        // دائماً أرجع JSON
+        return response()->json($items);
     }
 
     public function cancel(Appointment $appointment)

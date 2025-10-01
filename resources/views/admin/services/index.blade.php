@@ -1,205 +1,225 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3><i class="bi bi-list-task me-2"></i> إدارة الخدمات</h3>
-        <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addService">
-            <i class="bi bi-plus-circle me-1"></i> إضافة خدمة
-        </button>
-    </div>
+<div class="container py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
 
-    <!-- Add Service Form -->
-    <div id="addService" class="collapse mb-4">
-        <div class="card card-body bg-light border rounded">
-            <form method="POST" action="{{ route('admin.services.store') }}">
-                @csrf
-                <div class="row g-3">
-                    <div class="col-12 col-md-5">
-                        <label class="form-label">اسم الخدمة</label>
-                        <input name="name" class="form-control" placeholder="مثال: كشف طبيب أسنان" required>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label">السعر (ر.س)</label>
-                        <input name="price" type="number" step="0.01" min="0" class="form-control" placeholder="0.00" required>
-                    </div>
-                    <div class="col-12 col-md-2 d-flex align-items-end">
-                        <div class="form-check">
-                            <input name="active" class="form-check-input" type="checkbox" id="activeDefault" checked>
-                            <label class="form-check-label" for="activeDefault">مفعل</label>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-1 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">حفظ</button>
-                    </div>
-                </div>
-            </form>
+        <!-- العنوان وزر الإضافة -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <span class="mr-2">📋</span>
+                إدارة الخدمات
+            </h2>
+            <button
+                type="button"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                data-bs-toggle="collapse"
+                data-bs-target="#addService"
+            >
+                <i class="bi bi-plus-circle me-1"></i>
+                إضافة خدمة
+            </button>
         </div>
-    </div>
 
-    <!-- Success Message -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    <!-- Desktop Table -->
-    <div class="table-responsive d-none d-md-block">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>الاسم</th>
-                    <th>السعر</th>
-                    <th>الحالة</th>
-                    <th class="text-center">إجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($services as $s)
-                <tr>
-                    <td class="fw-bold">#{{ $s->id }}</td>
-                    <td>{{ $s->name }}</td>
-                    <td class="fw-bold text-success">{{ number_format($s->price, 2) }} ر.س</td>
-                    <td>
-                        <div class="form-check form-switch">
-                            <input 
-                                type="checkbox" 
-                                class="form-check-input service-toggle" 
-                                data-id="{{ $s->id }}" 
-                                {{ $s->active ? 'checked' : '' }}
-                                style="cursor: pointer;"
-                            >
-                            <label class="form-check-label text-muted small">
-                                {{ $s->active ? 'مفعل' : 'معطل' }}
-                            </label>
-                        </div>
-                    </td>
-                    <td class="text-end">
-                        <button 
-                            class="btn btn-sm btn-warning px-3 me-1" 
-                            onclick="openDesktopEdit({{ $s->id }}, '{{ addslashes($s->name) }}', {{ $s->price }}, {{ $s->active ? 'true' : 'false' }})">
-                            <i class="bi bi-pencil"></i> تعديل
-                        </button>
-                        <form method="POST" action="{{ route('admin.services.destroy', $s->id) }}" class="d-inline-block" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger px-3">
-                                <i class="bi bi-trash"></i> حذف
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">لا توجد خدمات مسجلة.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Desktop Edit Modal (Hidden Form) -->
-    <div id="desktopEditForm" class="d-none">
-        <form method="POST" action="" id="editServiceForm">
-            @csrf
-            @method('PUT')
-            <input type="hidden" name="id" id="edit_id">
-            <div class="row g-2 mt-2">
-                <div class="col-md-5">
-                    <input name="name" id="edit_name" class="form-control form-control-sm" placeholder="اسم الخدمة" required>
-                </div>
-                <div class="col-md-4">
-                    <input name="price" id="edit_price" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="السعر" required>
-                </div>
-                <div class="col-md-2 d-flex align-items-center">
-                    <div class="form-check">
-                        <input name="active" id="edit_active" class="form-check-input" type="checkbox">
-                        <label class="form-check-label">مفعل</label>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-sm btn-primary w-100">حفظ</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <!-- Mobile Cards -->
-    <div class="d-md-none">
-        @forelse($services as $s)
-        <div class="card mb-3 shadow-sm border-0">
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-start">
+        <!-- نموذج إضافة الخدمة -->
+        <div id="addService" class="collapse show mb-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <form method="POST" action="{{ route('admin.services.store') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    @csrf
                     <div>
-                        <h6 class="mb-1 fw-bold">{{ $s->name }}</h6>
-                        <div class="small text-success fw-bold">{{ number_format($s->price, 2) }} ر.س</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">اسم الخدمة</label>
+                        <input name="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="مثال: كشف طبيب أسنان" required>
                     </div>
-                    <div class="text-end">
-                        <div class="form-check form-switch mb-2">
-                            <input 
-                                class="form-check-input mobile-toggle" 
-                                type="checkbox" 
-                                data-id="{{ $s->id }}" 
-                                {{ $s->active ? 'checked' : '' }}
-                                style="cursor: pointer;"
-                            >
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">السعر (ر.س)</label>
+                        <input name="price" type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="0.00" required>
+                    </div>
+                    <div class="flex items-end">
+                        <div class="flex items-center">
+                            <input name="active" class="form-check-input h-5 w-5 text-blue-600 rounded focus:ring-blue-500" type="checkbox" id="activeDefault" checked>
+                            <label class="ml-2 block text-sm text-gray-700" for="activeDefault">مفعل</label>
                         </div>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="openMobileEdit({{ $s->id }}, '{{ addslashes($s->name) }}', {{ $s->price }}, {{ $s->active ? 'true' : 'false' }})">
-                            <i class="bi bi-pencil"></i> تعديل
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white font-medium text-sm rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all">
+                            حفظ
                         </button>
-                        <form method="POST" action="{{ route('admin.services.destroy', $s->id) }}" class="d-inline-block mt-1" onsubmit="return confirm('حذف؟')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> حذف
-                            </button>
-                        </form>
                     </div>
-                </div>
-
-                <!-- Mobile Edit Form -->
-                <div id="mobile-edit-{{ $s->id }}" class="mt-3 p-3 bg-light rounded d-none">
-                    <form method="POST" action="{{ route('admin.services.update', $s->id) }}">
-                        @csrf
-                        @method('PUT')
-                        <div class="row g-2">
-                            <div class="col-12">
-                                <input name="name" class="form-control form-control-sm" value="{{ $s->name }}" placeholder="اسم الخدمة" required>
-                            </div>
-                            <div class="col-6">
-                                <input name="price" type="number" step="0.01" min="0" class="form-control form-control-sm" value="{{ $s->price }}" placeholder="السعر" required>
-                            </div>
-                            <div class="col-4">
-                                <div class="form-check">
-                                    <input name="active" class="form-check-input" type="checkbox" {{ $s->active ? 'checked' : '' }}>
-                                    <label class="form-check-label small">مفعل</label>
-                                </div>
-                            </div>
-                            <div class="col-2">
-                                <button type="submit" class="btn btn-sm btn-primary w-100">حفظ</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                </form>
             </div>
         </div>
-        @empty
-        <div class="text-center py-5 text-muted">
-            <i class="bi bi-list-task" style="font-size: 2rem;"></i>
-            <div class="mt-2">لا توجد خدمات</div>
-        </div>
-        @endforelse
-    </div>
 
-    <!-- Pagination -->
-    @if($services->hasPages())
-        <div class="mt-4">
-            {{ $services->links() }}
+        <!-- رسالة النجاح -->
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-r-lg mb-6 text-right" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <!-- جدول سطح المكتب (مخفى على الهواتف) -->
+        <div class="hidden md:block">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السعر</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($services as $s)
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $s->id }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $s->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">{{ number_format($s->price, 2) }} ر.س</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center justify-end">
+                                        <input
+                                            type="checkbox"
+                                            class="service-toggle form-check-input h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                                            data-id="{{ $s->id }}"
+                                            {{ $s->active ? 'checked' : '' }}
+                                        >
+                                        <span class="ml-2 text-sm text-gray-500">{{ $s->active ? 'مفعل' : 'معطل' }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                    <button
+                                        class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-md hover:bg-yellow-200 mr-2 transition-colors"
+                                        onclick="openDesktopEdit({{ $s->id }}, '{{ addslashes($s->name) }}', {{ $s->price }}, {{ $s->active ? 'true' : 'false' }})"
+                                    >
+                                        <i class="bi bi-pencil me-1"></i> تعديل
+                                    </button>
+                                    <form method="POST" action="{{ route('admin.services.destroy', $s->id) }}" class="inline-block" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 text-xs rounded-md hover:bg-red-200 transition-colors">
+                                            <i class="bi bi-trash me-1"></i> حذف
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500 text-sm">
+                                    لا توجد خدمات مسجلة.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-    @endif
+
+        <!-- نموذج التعديل على سطح المكتب (مخفي) -->
+        <div id="desktopEditForm" class="hidden mt-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <form method="POST" action="" id="editServiceForm" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="id" id="edit_id">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">اسم الخدمة</label>
+                        <input name="name" id="edit_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="اسم الخدمة" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">السعر (ر.س)</label>
+                        <input name="price" id="edit_price" type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="السعر" required>
+                    </div>
+                    <div class="flex items-end">
+                        <div class="flex items-center">
+                            <input name="active" id="edit_active" class="form-check-input h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer" type="checkbox">
+                            <label class="ml-2 block text-sm text-gray-700">مفعل</label>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white font-medium text-sm rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all">
+                            حفظ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- بطاقات الهاتف (مظهر رئيسي على الجوال) -->
+        <div class="md:hidden space-y-4">
+            @forelse($services as $s)
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-800">{{ $s->name }}</h3>
+                                <p class="text-green-600 font-bold mt-1">{{ number_format($s->price, 2) }} ر.س</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center mb-2">
+                                    <input
+                                        type="checkbox"
+                                        class="mobile-toggle form-check-input h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                                        data-id="{{ $s->id }}"
+                                        {{ $s->active ? 'checked' : '' }}
+                                    >
+                                    <span class="ml-2 text-xs text-gray-500">{{ $s->active ? 'مفعل' : 'معطل' }}</span>
+                                </div>
+                                <button
+                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-md hover:bg-gray-200 transition-colors mb-2"
+                                    onclick="openMobileEdit({{ $s->id }}, '{{ addslashes($s->name) }}', {{ $s->price }}, {{ $s->active ? 'true' : 'false' }})"
+                                >
+                                    <i class="bi bi-pencil me-1"></i> تعديل
+                                </button>
+                                <form method="POST" action="{{ route('admin.services.destroy', $s->id) }}" class="inline-block" onsubmit="return confirm('هل أنت متأكد من الحذف؟')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 text-xs rounded-md hover:bg-red-200 transition-colors">
+                                        <i class="bi bi-trash me-1"></i> حذف
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- نموذج التعديل على الهاتف -->
+                        <div id="mobile-edit-{{ $s->id }}" class="mt-3 p-4 bg-gray-50 rounded-lg hidden">
+                            <form method="POST" action="{{ route('admin.services.update', $s->id) }}">
+                                @csrf
+                                @method('PUT')
+                                <div class="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <input name="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ $s->name }}" placeholder="اسم الخدمة" required>
+                                    </div>
+                                    <div>
+                                        <input name="price" type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ $s->price }}" placeholder="السعر" required>
+                                    </div>
+                                </div>
+                                <div class="flex items-center mb-3">
+                                    <input name="active" class="form-check-input h-5 w-5 text-blue-600 rounded focus:ring-blue-500" type="checkbox" {{ $s->active ? 'checked' : '' }}>
+                                    <label class="ml-2 text-sm text-gray-700">مفعل</label>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                    حفظ التغييرات
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <i class="bi bi-list-task text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500 text-lg">لا توجد خدمات</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- الترقيم -->
+        @if($services->hasPages())
+            <div class="mt-8">
+                {{ $services->links() }}
+            </div>
+        @endif
+
+    </div>
 </div>
 @endsection
 
@@ -236,10 +256,10 @@
     function openDesktopEdit(id, name, price, active) {
         const formContainer = document.getElementById('desktopEditForm');
         const form = document.getElementById('editServiceForm');
-        
+
         // Set form action
         form.action = `/admin/services/${id}`;
-        
+
         // Fill data
         document.getElementById('edit_id').value = id;
         document.getElementById('edit_name').value = name;
@@ -247,17 +267,17 @@
         document.getElementById('edit_active').checked = active;
 
         // Inject form after table or before pagination
-        const table = document.querySelector('.table');
+        const table = document.querySelector('.hidden.md\\:block');
         if (table) {
             table.parentNode.insertBefore(formContainer, table.nextSibling);
-            formContainer.classList.remove('d-none');
+            formContainer.classList.remove('hidden');
         }
     }
 
     // Open Mobile Edit
     function openMobileEdit(id, name, price, active) {
         const el = document.getElementById(`mobile-edit-${id}`);
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        el.classList.toggle('hidden');
     }
 </script>
 @endsection

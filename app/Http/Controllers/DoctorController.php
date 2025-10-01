@@ -27,11 +27,36 @@ class DoctorController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:doctors,user_id',
+            'user_id' => 'nullable|exists:users,id|unique:doctors,user_id',
+            'name' => 'nullable|string',
+            'email' => 'nullable|email|unique:users,email',
+            'password' => 'nullable|string|min:6',
             'specialty' => 'nullable|string',
             'phone' => 'nullable|string',
         ]);
-        Doctor::create($data);
+
+        // إذا لم يتم اختيار مستخدم، ننشئ مستخدم جديد
+        if (empty($data['user_id'])) {
+            $user = User::create([
+                'name' => $data['name'] ?? 'طبيب جديد',
+                'email' => $data['email'] ?? null,
+                'password' => isset($data['password']) ? bcrypt($data['password']) : bcrypt('doctor123'),
+            ]);
+            $user->assignRole('doctor');
+            $data['user_id'] = $user->id;
+        } else {
+            $user = User::find($data['user_id']);
+            if ($user && !$user->hasRole('doctor')) {
+                $user->assignRole('doctor');
+            }
+        }
+
+        Doctor::create([
+            'user_id' => $data['user_id'],
+            'specialty' => $data['specialty'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'name' => $user->name,
+        ]);
         return redirect()->route('admin.doctors.index')->with('success', 'تم إضافة الطبيب بنجاح');
     }
 

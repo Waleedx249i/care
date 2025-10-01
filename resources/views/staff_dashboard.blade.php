@@ -1,54 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="row mb-3">
-        <div class="col-12">
-            <h2>Staff Dashboard</h2>
-        </div>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-blue-700">Staff Dashboard</h2>
     </div>
 
     @if(session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        <div class="mb-4 px-4 py-2 rounded bg-green-100 text-green-700">{{ session('status') }}</div>
     @endif
 
     {{-- KPI cards --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card text-center p-3">
-                <div class="h5">Today's Appointments</div>
-                <div class="display-6">{{ $kpiAppointments }}</div>
-            </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow text-center p-5">
+            <div class="text-lg font-semibold text-gray-700 mb-2">Today's Appointments</div>
+            <div class="text-3xl font-bold text-blue-700">{{ $kpiAppointments }}</div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card text-center p-3">
-                <div class="h5">New Patients Today</div>
-                <div class="display-6">{{ $newPatientsToday }}</div>
-            </div>
+        <div class="bg-white rounded-lg shadow text-center p-5">
+            <div class="text-lg font-semibold text-gray-700 mb-2">New Patients Today</div>
+            <div class="text-3xl font-bold text-blue-700">{{ $newPatientsToday }}</div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card text-center p-3">
-                <div class="h5">Pending Invoices</div>
-                <div class="display-6">{{ $kpiPendingInvoices }}</div>
-            </div>
+        <div class="bg-white rounded-lg shadow text-center p-5">
+            <div class="text-lg font-semibold text-gray-700 mb-2">Pending Invoices</div>
+            <div class="text-3xl font-bold text-blue-700">{{ $kpiPendingInvoices }}</div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card text-center p-3">
-                <div class="h5">Collected Today</div>
-                <div class="display-6">{{ number_format($kpiCollected, 2) }}</div>
-            </div>
+        <div class="bg-white rounded-lg shadow text-center p-5">
+            <div class="text-lg font-semibold text-gray-700 mb-2">Collected Today</div>
+            <div class="text-3xl font-bold text-blue-700">{{ number_format($kpiCollected, 2) }}</div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12 col-lg-6 mb-4">
-            <div class="card">
-                <div class="card-header">Today's Appointments</div>
-                <div class="card-body p-0">
-                    {{-- Desktop table --}}
-                    <div class="table-responsive d-none d-md-block">
-                        <table class="table mb-0">
-                            <thead>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-5 py-4 border-b font-semibold text-gray-700">Today's Appointments</div>
+            <div class="p-5">
+                {{-- Desktop table --}}
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="min-w-full bg-white rounded shadow">
+                        <thead class="bg-blue-50">
                                 <tr>
                                     <th>Time</th>
                                     <th>Patient</th>

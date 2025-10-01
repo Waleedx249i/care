@@ -29,7 +29,7 @@ class DoctorsSeeder extends Seeder
                     'password' => Hash::make('password')
                 ]
             );
-
+            $user->assignRole('doctor');
             // ربط الدوكتور باليوزر الذي تم إنشاؤه/تحديثه
             Doctor::updateOrCreate(
                 ['name' => $d['name']],

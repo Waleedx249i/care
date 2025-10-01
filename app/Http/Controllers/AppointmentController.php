@@ -11,10 +11,15 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        $appointments = Appointment::with(['patient','doctor.user'])->orderBy('starts_at')->get();
+        $appointments = Appointment::with(['patient','doctor.user'])->orderBy('starts_at')->paginate(15);
+       
         return view('admin.appointments.index', compact('appointments'));
     }
-
+  public function show(Appointment $appointment)
+    {
+        // عرض تفاصيل الموعد (يمكنك تخصيص العرض لاحقاً)
+        return view('admin.appointments.show', compact('appointment'));
+    }
     public function create()
     {
         $patients = Patient::all();

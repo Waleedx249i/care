@@ -1,115 +1,109 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Admin Dashboard</h2>
+<div class="p-4">
 
-    <div class="row mt-3">
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card p-3">
-                <div class="text-muted">Total Doctors</div>
-                <div class="h3">{{ $totalDoctors }}</div>
-            </div>
+    <!-- 📊 الإحصائيات -->
+    <h2 class="text-xl font-bold mb-4 text-gray-700">لوحة تحكم المدير</h2>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-gray-500 text-sm">إجمالي الأطباء</div>
+            <div class="text-2xl font-bold text-blue-600">{{ $totalDoctors }}</div>
         </div>
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card p-3">
-                <div class="text-muted">Total Patients</div>
-                <div class="h3">{{ $totalPatients }}</div>
-            </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-gray-500 text-sm">إجمالي المرضى</div>
+            <div class="text-2xl font-bold text-green-600">{{ $totalPatients }}</div>
         </div>
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card p-3">
-                <div class="text-muted">Today's Appointments</div>
-                <div class="h3">{{ $todaysAppointments }}</div>
-            </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-gray-500 text-sm">مواعيد اليوم</div>
+            <div class="text-2xl font-bold text-purple-600">{{ $todaysAppointments }}</div>
         </div>
-        <div class="col-6 col-md-3 mb-3">
-            <div class="card p-3">
-                <div class="text-muted">Monthly Revenue</div>
-                <div class="h3">{{ number_format($monthlyRevenue,2) }}</div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-gray-500 text-sm">إيرادات الشهر</div>
+            <div class="text-2xl font-bold text-orange-600">{{ number_format($monthlyRevenue,2) }}</div>
+        </div>
+    </div>
+
+    <!-- 📈 الرسوم البيانية -->
+    <div class="bg-white rounded-xl shadow p-4 mt-6">
+        <div class="flex justify-between items-center mb-4">
+            <h5 class="font-semibold text-gray-700">الرسوم البيانية</h5>
+        </div>
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="flex-1 min-h-[250px]">
+                <canvas id="appointmentsChart"></canvas>
+            </div>
+            <div class="flex-1 min-h-[250px]">
+                <canvas id="revenueChart"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="row mt-3">
-        <div class="col-12 mb-3">
-            <div class="card p-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0">Charts</h5>
-                </div>
-                <div class="charts-wrapper" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-                    <div style="min-width:700px; display:flex; gap:20px;">
-                        <div style="flex:1; min-width:320px;">
-                            <canvas id="appointmentsChart"></canvas>
-                        </div>
-                        <div style="flex:1; min-width:320px;">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- 🧾 الفواتير و المرضى -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
 
-    <div class="row mt-3">
-        <div class="col-12 col-lg-6 mb-3">
-            <div class="card p-3">
-                <h5>Latest Invoices</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
+        <!-- Latest Invoices -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h5 class="font-semibold text-gray-700 mb-3">أحدث الفواتير</h5>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-right">
+                    <thead class="bg-gray-50 text-gray-600">
+                        <tr>
+                            <th class="p-2">#</th>
+                            <th class="p-2">المريض</th>
+                            <th class="p-2">الطبيب</th>
+                            <th class="p-2 text-left">الإجمالي</th>
+                            <th class="p-2">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @foreach($latestInvoices as $inv)
                             <tr>
-                                <th>ID</th>
-                                <th>Patient</th>
-                                <th>Doctor</th>
-                                <th class="text-end">Total</th>
-                                <th>Status</th>
+                                <td class="p-2">{{ $inv->id }}</td>
+                                <td class="p-2">{{ $inv->patient->name ?? $inv->patient->first_name.' '.$inv->patient->last_name }}</td>
+                                <td class="p-2">{{ $inv->doctor->user->name ?? $inv->doctor->name }}</td>
+                                <td class="p-2 text-left font-semibold">{{ number_format($inv->net_total,2) }}</td>
+                                <td class="p-2">
+                                    <span class="px-2 py-1 text-xs rounded-full 
+                                        {{ $inv->status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                        {{ ucfirst($inv->status) }}
+                                    </span>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($latestInvoices as $inv)
-                                <tr>
-                                    <td>{{ $inv->id }}</td>
-                                    <td>{{ $inv->patient->name ?? $inv->patient->first_name.' '.$inv->patient->last_name }}</td>
-                                    <td>{{ $inv->doctor->user->name ?? $inv->doctor->name }}</td>
-                                    <td class="text-end">{{ number_format($inv->net_total,2) }}</td>
-                                    <td>{{ ucfirst($inv->status) }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="col-12 col-lg-6 mb-3">
-            <div class="card p-3">
-                <h5>Latest Patients</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
+        <!-- Latest Patients -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h5 class="font-semibold text-gray-700 mb-3">أحدث المرضى</h5>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-right">
+                    <thead class="bg-gray-50 text-gray-600">
+                        <tr>
+                            <th class="p-2">الاسم</th>
+                            <th class="p-2">الكود</th>
+                            <th class="p-2">تاريخ التسجيل</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @foreach($latestPatients as $p)
                             <tr>
-                                <th>Name</th>
-                                <th>Code</th>
-                                <th>Created</th>
+                                <td class="p-2">{{ $p->name }}</td>
+                                <td class="p-2">{{ $p->code }}</td>
+                                <td class="p-2">{{ $p->created_at->toDateString() }}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($latestPatients as $p)
-                                <tr>
-                                    <td>{{ $p->name }}</td>
-                                    <td>{{ $p->code }}</td>
-                                    <td>{{ $p->created_at->toDateString() }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
+
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
@@ -118,32 +112,31 @@
     const dates = {!! json_encode($dates) !!};
     const counts = {!! json_encode($counts) !!};
 
-    const appCtx = document.getElementById('appointmentsChart').getContext('2d');
-    new Chart(appCtx, {
+    new Chart(document.getElementById('appointmentsChart'), {
         type: 'line',
         data: {
             labels: dates,
             datasets: [{
-                label: 'Appointments',
+                label: 'المواعيد',
                 data: counts,
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0,123,255,0.1)',
-                tension: 0.2
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.1)',
+                tension: 0.3
             }]
         },
         options: {responsive:true, maintainAspectRatio:false}
     });
 
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(revenueCtx, {
+    new Chart(document.getElementById('revenueChart'), {
         type: 'doughnut',
         data: {
-            labels: ['Paid','Unpaid'],
+            labels: ['مدفوع','غير مدفوع'],
             datasets: [{
                 data: [{{ (float)$paid }}, {{ (float)$unpaid }}],
-                backgroundColor: ['#28a745','#dc3545']
+                backgroundColor: ['#22c55e','#ef4444']
             }]
         },
         options: {responsive:true, maintainAspectRatio:false}
     });
 </script>
+@endsection

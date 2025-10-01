@@ -47,22 +47,60 @@ class DoctorWorkingHoursController extends Controller
         } else {
             $doctor = Auth::user()->doctor;
         }
-        $data = $request->validate([
-            'intervals' => 'required|array',
-            'intervals.*.weekday' => 'required|integer|between:0,6',
-            'intervals.*.start_time' => 'required|date_format:H:i',
-            'intervals.*.end_time' => 'required|date_format:H:i|after:intervals.*.start_time',
-        ]);
+        $periods = $request->input('periods');
+        // تحويل periods إلى مصفوفة flat إذا كانت بصيغة periods[day][]
+        $flatPeriods = [];
+        if (is_array($periods)) {
+            foreach ($periods as $day => $items) {
+                if (is_array($items['weekday'] ?? null)) {
+                    // إذا كانت periods[day][weekday][]
+                    for ($i = 0; $i < count($items['weekday']); $i++) {
+                        $flatPeriods[] = [
+                            'weekday' => $items['weekday'][$i] ?? $day,
+                            'start_time' => $items['start_time'][$i] ?? null,
+                            'end_time' => $items['end_time'][$i] ?? null,
+                        ];
+                    }
+                } else {
+                    // إذا كانت periods[day][weekday]
+                    $flatPeriods[] = [
+                        'weekday' => $items['weekday'] ?? $day,
+                        'start_time' => $items['start_time'] ?? null,
+                        'end_time' => $items['end_time'] ?? null,
+                    ];
+                }
+            }
+        }
 
-        // Validate overlaps per weekday
+        // تحقق من أن periods ليست فارغة
+        if (empty($flatPeriods)) {
+            return back()->withErrors(['periods' => 'يجب إضافة فترة واحدة على الأقل.'])->withInput();
+        }
+
+        // تحقق من صحة البيانات
+        foreach ($flatPeriods as $idx => $int) {
+            if (!isset($int['weekday']) || !is_numeric($int['weekday']) || $int['weekday'] < 0 || $int['weekday'] > 6) {
+                return back()->withErrors(["periods.$idx.weekday" => "يرجى اختيار يوم صحيح للفترة رقم " . ($idx+1)])->withInput();
+            }
+            if (!preg_match('/^\d{2}:\d{2}$/', $int['start_time'] ?? '')) {
+                return back()->withErrors(["periods.$idx.start_time" => "يرجى إدخال وقت البداية بالتنسيق الصحيح للفترة رقم " . ($idx+1)])->withInput();
+            }
+            if (!preg_match('/^\d{2}:\d{2}$/', $int['end_time'] ?? '')) {
+                return back()->withErrors(["periods.$idx.end_time" => "يرجى إدخال وقت النهاية بالتنسيق الصحيح للفترة رقم " . ($idx+1)])->withInput();
+            }
+            if (($int['start_time'] ?? '') >= ($int['end_time'] ?? '')) {
+                return back()->withErrors(["periods.$idx.end_time" => "يجب أن يكون وقت النهاية بعد وقت البداية للفترة رقم " . ($idx+1)])->withInput();
+            }
+        }
+
+        // تحقق من التداخل
         $byDay = [];
-        foreach($data['intervals'] as $int){
+        foreach($flatPeriods as $int){
             $w = $int['weekday'];
             $s = $int['start_time'];
             $e = $int['end_time'];
             if(!isset($byDay[$w])) $byDay[$w]=[];
             foreach($byDay[$w] as $existing){
-                // existing (es,ee), check overlap
                 if(!($e <= $existing[0] || $s >= $existing[1])){
                     return back()->with('error', 'فترات متداخلة في اليوم: '.$w);
                 }
@@ -70,10 +108,9 @@ class DoctorWorkingHoursController extends Controller
             $byDay[$w][] = [$s,$e];
         }
 
-        DB::transaction(function() use ($doctor, $data){
-            // replace existing
+        DB::transaction(function() use ($doctor, $flatPeriods){
             WorkingHour::where('doctor_id', $doctor->id)->delete();
-            foreach($data['intervals'] as $int){
+            foreach($flatPeriods as $int){
                 WorkingHour::create([
                     'doctor_id' => $doctor->id,
                     'weekday' => $int['weekday'],

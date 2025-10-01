@@ -1,50 +1,54 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>My Medical Records</h3>
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h3 class="text-2xl font-bold text-blue-700">My Medical Records</h3>
     </div>
 
-    <div class="table-responsive d-none d-md-block">
-        <table class="table table-striped">
-            <thead><tr><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Actions</th></tr></thead>
+    <div class="hidden md:block overflow-x-auto">
+        <table class="min-w-full bg-white rounded shadow">
+            <thead class="bg-blue-50">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Doctor</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Diagnosis</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach($records as $r)
-                    <tr>
-                        <td>{{ optional($r->visit_date)->toDateString() }}</td>
-                        <td>{{ $r->doctor->name }}</td>
-                        <td>{{ \Illuminate\Support\Str::limit($r->diagnosis, 80) }}</td>
-                        <td><a class="btn btn-sm btn-outline-secondary" href="{{ route('patient.medical_records.show', $r) }}">View</a></td>
+                    <tr class="border-b">
+                        <td class="px-4 py-2">{{ optional($r->visit_date)->toDateString() }}</td>
+                        <td class="px-4 py-2">{{ $r->doctor->name }}</td>
+                        <td class="px-4 py-2">{{ \Illuminate\Support\Str::limit($r->diagnosis, 80) }}</td>
+                        <td class="px-4 py-2">
+                            <a class="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-xs" href="{{ route('patient.medical_records.show', $r) }}">View</a>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    <div class="d-block d-md-none">
-        <div class="row">
+    <div class="block md:hidden">
+        <div class="grid grid-cols-1 gap-3">
             @foreach($records as $r)
-                <div class="col-12 mb-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="fw-bold">{{ optional($r->visit_date)->toDayDateString() }}</div>
-                                    <div class="text-muted">Dr. {{ $r->doctor->name }}</div>
-                                </div>
-                                <a class="btn btn-sm btn-outline-secondary" href="{{ route('patient.medical_records.show', $r) }}">View</a>
-                            </div>
-                            <div class="mt-2 collapse" id="diag-{{ $r->id }}">{{ $r->diagnosis }}</div>
-                            <button class="btn btn-sm btn-link p-0" data-bs-toggle="collapse" data-bs-target="#diag-{{ $r->id }}">Toggle diagnosis</button>
+                <div class="bg-white rounded-lg shadow p-4 mb-2">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-blue-700">{{ optional($r->visit_date)->toDayDateString() }}</div>
+                            <div class="text-gray-500">Dr. {{ $r->doctor->name }}</div>
                         </div>
+                        <a class="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-xs" href="{{ route('patient.medical_records.show', $r) }}">View</a>
                     </div>
+                    <div class="mt-2 text-gray-500">{{ $r->diagnosis }}</div>
                 </div>
             @endforeach
         </div>
     </div>
 
-    {{ $records->links() }}
+    <div class="mt-6">{{ $records->links() }}</div>
 </div>
 
 @endsection

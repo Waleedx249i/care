@@ -19,6 +19,42 @@
                     <button class="btn btn-link position-relative" aria-label="Notifications" id="notif-btn">
                         إشعارات
                         <span class="badge bg-danger ms-1">{{$notifications?$notifications->count() : 0 }}</span>
+        <!-- New layout with Tailwind CSS -->
+        <div class="mb-6">
+            <div class="flex flex-col md:flex-row items-center justify-between bg-white p-5 rounded-lg shadow">
+                <div class="flex items-center gap-4">
+                    <img src="{{ asset('storage/profile-placeholder.png') }}" alt="profile" class="rounded-full w-14 h-14">
+                    <div>
+                        <div class="font-bold text-lg text-blue-700">{{ $doctor->name }}</div>
+                        <div class="text-gray-500 text-sm">{{ $doctor->specialty }}</div>
+                    </div>
+                </div>
+                <div>
+                    <button class="relative px-4 py-2 rounded bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition" aria-label="Notifications" id="notif-btn">
+                        إشعارات
+                        <span class="absolute top-0 right-0 -mt-2 -mr-2 px-2 py-1 rounded-full bg-red-600 text-white text-xs">{{$notifications?$notifications->count() : 0 }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow text-center p-5">
+                <div class="text-sm text-gray-500 mb-2">مواعيد اليوم</div>
+                <div class="text-2xl font-bold text-blue-700">{{ $appointments->count() }}</div>
+            </div>
+            <div class="bg-white rounded-lg shadow text-center p-5">
+                <div class="text-sm text-gray-500 mb-2">فواتير غير مدفوعة</div>
+                <div class="text-2xl font-bold text-blue-700">{{ $invoices->count() }} / {{ number_format($invoices->sum('net_total'),2) }} SDG</div>
+            </div>
+            <div class="bg-white rounded-lg shadow text-center p-5">
+                <div class="text-sm text-gray-500 mb-2">مرضى جدد (7 أيام)</div>
+                <div class="text-2xl font-bold text-blue-700">{{ $newPatients->count() }}</div>
+            </div>
+            <div class="bg-white rounded-lg shadow text-center p-5">
+                <div class="text-sm text-gray-500 mb-2">إشعارات غير مقرؤة</div>
+                <div class="text-2xl font-bold text-blue-700">{{ $notifications?$notifications->count() : 0 }}</div>
+            </div>
                     </button>
                 </div>
             </div>

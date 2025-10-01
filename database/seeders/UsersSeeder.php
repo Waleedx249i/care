@@ -13,35 +13,43 @@ class UsersSeeder extends Seeder
     public function run(): void
     {
         // مستخدم عادي
-        $user = User::create([
-            'name' => 'User One',
-            'email' => 'user.care.com',
-            'password' => bcrypt('password'),
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'user@care.com'],
+            [
+                'name' => 'User One',
+                'password' => bcrypt('password'),
+            ]
+        );
         $user->assignRole('user');
 
         // طبيب
-        $doctor = User::create([
-            'name' => 'Doctor One',
-            'email' => 'doctor.care.com',
-            'password' => bcrypt('password'),
-        ]);
+        $doctor = User::firstOrCreate(
+            ['email' => 'doctor@care.com'],
+            [
+                'name' => 'Doctor One',
+                'password' => bcrypt('password'),
+            ]
+        );
         $doctor->assignRole('doctor');
 
         // أدمن
-        $admin = User::create([
-            'name' => 'Admin One',
-            'email' => 'admin.care.com',
-            'password' => bcrypt('password'),
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@care.com'],
+            [
+                'name' => 'Admin One',
+                'password' => bcrypt('password'),
+            ]
+        );
         $admin->assignRole('admin');
 
         // موظف
-        $staff = User::create([
-            'name' => 'Staff One',
-            'email' => 'staff.care.com',
-            'password' => bcrypt('password'),
-        ]);
+        $staff = User::firstOrCreate(
+            ['email' => 'staff@care.com'],
+            [
+                'name' => 'Staff One',
+                'password' => bcrypt('password'),
+            ]
+        );
         $staff->assignRole('staff');
     }
 }

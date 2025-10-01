@@ -7,6 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
     
+// مسار API للمواعيد متاح للواجهة فقط بدون تحقق صلاحيات
+Route::get('/admin/appointments/api', [App\Http\Controllers\Admin\AppointmentsController::class, 'apiList']);
+
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return view('admin_dashboard');
